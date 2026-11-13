@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-root="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>270° Rooftop & Café</title>
+<meta name="description" content="270° Rooftop and 270° Café. Menus, reservations and how to find us.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="assets/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<link rel="stylesheet" href="assets/style.css?v=214841">
+</head>
+<body>
+
+<header data-header></header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="sky" aria-hidden="true"></div>
+    <div class="dial">
+      <svg viewBox="0 0 400 400" aria-hidden="true">
+        <circle class="arc" cx="200" cy="200" r="192" pathLength="360"/>
+        <g class="sun" id="sun"><circle class="halo" cx="392" cy="200" r="16"/><circle cx="392" cy="200" r="4.5"/></g>
+      </svg>
+      <h1 class="mark"><img src="assets/logo-mark.png?v=214841" alt="270°" width="950" height="540"></h1>
+      <p class="rule">Rooftop · Café</p>
+    </div>
+    <p class="lead">Food we love, done right. And a view to go with it.</p>
+    <div class="actions">
+      <a class="btn" href="rooftop/">Rooftop menu</a>
+      <a class="btn" href="cafe/">Café menu</a>
+    </div>
+    <p class="now" id="now"></p>
+  </section>
+
+  <div class="places">
+    <a class="place" href="rooftop/">
+      <p class="eyebrow">Escada, 18th floor</p>
+      <h2 class="logo-h"><img src="assets/logo-rooftop.png?v=214841" alt="270° Rooftop" width="950" height="776"></h2>
+      <p>Flame-grilled mains, plates to share, signature cocktails and the view.</p>
+      <span class="more">See the menu</span>
+    </a>
+    <a class="place" href="cafe/">
+      <p class="eyebrow">Marina Bay Square</p>
+      <h2 class="logo-h"><img src="assets/logo-cafe.png?v=214841" alt="270° Café" width="766" height="815"></h2>
+      <p>Breakfast, smoothie bowls, sandwiches and specialty coffee.</p>
+      <span class="more">See the menu</span>
+    </a>
+  </div>
+
+  <section class="block center story">
+    <p class="eyebrow">Our kitchen</p>
+    <p>When we opened, our goal was simple: serve food we love, done right. After two years of hosting guests from Kenya and across the globe, we’ve learned what you love most.</p>
+    <p>We’ve stripped back the noise and focused entirely on your favorite dishes. No fluff, just our absolute best.</p>
+    <p class="signoff">The 270° Team</p>
+  </section>
+
+  <section class="block center">
+    <p class="eyebrow">Events</p>
+    <h2 class="sans-h">Host your event at <img class="inline-mark" src="assets/logo-mark.png?v=214841" alt="270°" width="950" height="540"></h2>
+    <p class="events-lead">Celebrations, private dinners and company gatherings, at the rooftop or at the café, planned around you.</p>
+    <div class="actions"><a class="btn" href="events/">Inquire</a></div>
+  </section>
+
+  <section class="block center" id="visit">
+    <p class="eyebrow">Visit</p>
+    <div class="venues">
+      <div class="venue" data-venue-info="rooftop"></div>
+      <div class="venue" data-venue-info="cafe"></div>
+    </div>
+  </section>
+</main>
+
+<footer data-footer></footer>
+
+<script src="assets/site.js?v=214841"></script>
+<script>
+/* The hero follows the time of day in Nairobi: the dot travels the 270° arc from
+   sunrise to sunset and the light changes with it. Try ?hour=18.5 to preview. */
+(function () {
+  var hero = document.getElementById("hero"), sun = document.getElementById("sun");
+  var forced = (location.search.match(/[?&]hour=([\d.]+)/) || [])[1];
+  var now = new Date(), h;
+  if (forced) h = parseFloat(forced);
+  else { var utc = now.getUTCHours() + now.getUTCMinutes() / 60; h = (utc + 3) % 24; }   // Nairobi is UTC+3 all year
+
+  var mood = h >= 5.5 && h < 8 ? "dawn" : h >= 8 && h < 16.5 ? "day" : h >= 16.5 && h < 19.25 ? "sunset" : "night";
+  hero.setAttribute("data-mood", mood);
+
+  var f = Math.min(1, Math.max(0, (h - 6.25) / (18.75 - 6.25)));     // sunrise to sunset
+  if (mood === "night") f = 1;
+  setTimeout(function () {
+    hero.classList.add("lit");
+    sun.style.transform = "rotate(" + (135 + 270 * f) + "deg)";
+  }, 80);
+
+  var hh = Math.floor(h), mm = Math.floor((h - hh) * 60);
+  document.getElementById("now").textContent = (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm + " in Nairobi";
+
+  /* Sections fade in as they come into view */
+  if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { rootMargin: "0px 0px -10% 0px" });
+    Array.prototype.forEach.call(document.querySelectorAll(".place, .block"), function (n) { n.classList.add("reveal"); io.observe(n); });
+  }
+})();
+</script>
+</body>
+</html>

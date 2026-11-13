@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Events · 270°</title>
+<meta name="description" content="Host your event at 270° Rooftop or 270° Café in Nairobi. Tell us what you have in mind and we plan it around you.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="../assets/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/icon.png">
+<link rel="stylesheet" href="../assets/style.css?v=214841">
+</head>
+<body>
+
+<header data-header></header>
+
+<main>
+  <section class="menu-head events-head">
+    <p class="eyebrow">Events</p>
+    <h1>Host your event at <img class="inline-mark" src="../assets/logo-mark.png?v=214841" alt="270°" width="950" height="540"></h1>
+    <p class="events-lead">Celebrations, private dinners and company gatherings, at the rooftop or at the café.</p>
+    <a class="btn solid" href="#inquire">Inquire</a>
+  </section>
+
+  <section class="block center">
+    <div class="points">
+      <div>
+        <h3>Two locations</h3>
+        <p>We host at 270° Rooftop at Escada and at 270° Café at Marina Bay Square. Tell us which one suits your event, or let us suggest one.</p>
+      </div>
+      <div>
+        <h3>Customized experience</h3>
+        <p>Every event is planned around you. We put together the menu, the drinks and the setup to fit your occasion and your guests.</p>
+      </div>
+      <div>
+        <h3>Contact us</h3>
+        <p>Send us the date, the number of guests and what you have in mind. We get back to you with a proposal.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="inquire">
+    <p class="eyebrow center-text">Inquire</p>
+    <h2 class="center-text">Tell us about your event</h2>
+
+    <form class="form" id="inquiry" novalidate>
+      <div class="field">
+        <label for="f-name">Your name</label>
+        <input id="f-name" name="name" type="text" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="f-contact">Email or phone</label>
+        <input id="f-contact" name="contact" type="text" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="f-location">Location</label>
+        <select id="f-location" name="location">
+          <option>No preference</option>
+          <option>270° Rooftop</option>
+          <option>270° Café</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-date">Date</label>
+        <input id="f-date" name="date" type="date">
+      </div>
+      <div class="field">
+        <label for="f-guests">Number of guests</label>
+        <input id="f-guests" name="guests" type="number" min="1" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label for="f-occasion">Occasion</label>
+        <input id="f-occasion" name="occasion" type="text" placeholder="Birthday, dinner, company event">
+      </div>
+      <div class="field wide">
+        <label for="f-message">What do you have in mind?</label>
+        <textarea id="f-message" name="message" rows="5"></textarea>
+      </div>
+      <p class="form-error wide" id="form-error" role="alert" hidden></p>
+      <div class="form-actions wide" id="form-actions"></div>
+      <p class="form-hint wide" id="form-hint"></p>
+    </form>
+  </section>
+</main>
+
+<footer data-footer></footer>
+
+<script src="../assets/site.js?v=214841"></script>
+<script>
+(function () {
+  var S = window.SITE, el = window.el, E = S.events;
+  var form = document.getElementById("inquiry"), actions = document.getElementById("form-actions");
+  var error = document.getElementById("form-error"), hint = document.getElementById("form-hint");
+
+  function message() {
+    var f = form.elements, lines = ["Event inquiry for 270°", ""];
+    [["Name", f.name.value], ["Contact", f.contact.value], ["Location", f.location.value], ["Date", f.date.value],
+     ["Guests", f.guests.value], ["Occasion", f.occasion.value]].forEach(function (r) {
+      if (r[1].trim()) lines.push(r[0] + ": " + r[1].trim());
+    });
+    if (f.message.value.trim()) lines.push("", f.message.value.trim());
+    return lines.join("\n");
+  }
+  function valid() {
+    var f = form.elements, missing = [];
+    if (!f.name.value.trim()) missing.push(f.name);
+    if (!f.contact.value.trim()) missing.push(f.contact);
+    [f.name, f.contact].forEach(function (i) { i.classList.toggle("bad", missing.indexOf(i) > -1); });
+    error.hidden = !missing.length;
+    if (missing.length) { error.textContent = "Please add your name and how we can reach you."; missing[0].focus(); }
+    return !missing.length;
+  }
+  function button(label, solid, go) {
+    var b = el("button", { type: "button", class: "btn" + (solid ? " solid" : ""), text: label });
+    b.addEventListener("click", function () { if (valid()) go(); });
+    actions.appendChild(b);
+  }
+
+  if (E.whatsapp) button("Send via WhatsApp", true, function () {
+    window.open("https://wa.me/" + E.whatsapp + "?text=" + encodeURIComponent(message()), "_blank", "noopener");
+  });
+  if (E.email) button("Send by email", !E.whatsapp, function () {
+    location.href = "mailto:" + E.email + "?subject=" + encodeURIComponent("Event inquiry") + "&body=" + encodeURIComponent(message());
+  });
+  if (E.whatsapp || E.email) {
+    hint.textContent = "Your " + (E.whatsapp && E.email ? "WhatsApp or email app" : E.whatsapp ? "WhatsApp" : "email app") +
+      " opens with your inquiry filled in. Nothing is stored on this website.";
+  } else {
+    /* Not connected yet: add an email address or WhatsApp number under "events" in assets/site.js */
+    button("Send inquiry", true, function () {
+      error.hidden = false;
+      error.textContent = "The form is not connected yet. Add an email address or WhatsApp number in assets/site.js.";
+    });
+  }
+  form.addEventListener("submit", function (e) { e.preventDefault(); });
+})();
+</script>
+</body>
+</html>
