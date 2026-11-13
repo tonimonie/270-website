@@ -440,3 +440,7 @@ html[data-venue="rooftop"] [data-footer] { font-size: 15px; }
 .inquire-call { text-align: center; margin-top: 10px; }
 .inquire-call .call { font-family: var(--sans); font-weight: 300; font-size: 18px; letter-spacing: 0.04em; margin-top: 14px !important; }
 .inquire-call .events-lead { margin-bottom: 26px; }
+
+/* The time belongs to the logo: close under the circle, with more air before the hero line */
+.now { margin-top: 4px; }
+.hero p.lead { margin-top: clamp(40px, 7vh, 60px); }
