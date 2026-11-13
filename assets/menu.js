@@ -30,7 +30,9 @@
   M.sections.forEach(function (s) {
     var id = slug(s.title);
     tabs.appendChild(el("a", { href: "#" + id, text: s.title }));
-    var parts = [el("h2", { text: s.title })];
+    var parts = [];
+    if (s.intro) parts.push(el("p", { class: "menu-intro", text: s.intro }));   // short line that belongs to this section
+    parts.push(el("h2", { text: s.title }));
     if (s.subtitle) parts.push(el("p", { class: "subtitle", text: s.subtitle }));
     if (s.items) parts.push(list(s.items));
     (s.groups || []).forEach(function (g) {
@@ -51,26 +53,40 @@
   if (M.updated) notes.push(el("p", { text: "Menu as of " + M.updated }));
   if (notes.length) mount.appendChild(el("div", { class: "menu-notes" }, notes));
 
-  /* A link straight to a section (…/rooftop/#wines) lands there once the menu is drawn */
-  if (location.hash) {
-    var target = document.getElementById(location.hash.slice(1));
-    if (target) target.scrollIntoView();
+  /* One section at a time: the tabs switch between them. A link such as …/rooftop/#wines opens that tab. */
+  var links = Array.prototype.slice.call(tabs.children);
+  var panels = Array.prototype.slice.call(sections.children);
+  tabs.setAttribute("role", "tablist");
+  links.forEach(function (a, i) {
+    a.setAttribute("role", "tab");
+    a.setAttribute("aria-controls", panels[i].id);
+    panels[i].setAttribute("role", "tabpanel");
+  });
+
+  function show(id, fromClick) {
+    var index = 0;
+    panels.forEach(function (p, i) { if (p.id === id) index = i; });
+    panels.forEach(function (p, i) { p.hidden = i !== index; });
+    var general = mount.querySelector(":scope > .menu-intro");
+    if (general) general.hidden = index !== 0;      // a general tip (MENU.intro) shows with the first section only
+    links.forEach(function (a, i) {
+      a.classList.toggle("on", i === index);
+      a.setAttribute("aria-selected", i === index ? "true" : "false");
+    });
+    var a = links[index];
+    if (tabs.scrollWidth > tabs.clientWidth) tabs.scrollTo({ left: a.offsetLeft - 20, behavior: fromClick ? "smooth" : "auto" });
+    if (fromClick) {
+      if (history.replaceState) history.replaceState(null, "", "#" + panels[index].id);
+      /* If the reader had scrolled down, bring the new section's start back under the tabs */
+      var header = document.querySelector("[data-header]");
+      var top = mount.getBoundingClientRect().top + window.pageYOffset - (header ? header.offsetHeight : 0);
+      if (window.pageYOffset > top) window.scrollTo(0, top);
+    }
   }
 
-  /* Highlight the section in view */
-  if ("IntersectionObserver" in window) {
-    var links = {};
-    Array.prototype.forEach.call(tabs.children, function (a) { links[a.getAttribute("href").slice(1)] = a; });
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        Object.keys(links).forEach(function (k) { links[k].classList.toggle("on", k === e.target.id); });
-        var a = links[e.target.id];
-        if (a && tabs.scrollWidth > tabs.clientWidth) {
-          tabs.scrollTo({ left: a.offsetLeft - 20, behavior: "smooth" });
-        }
-      });
-    }, { rootMargin: "-25% 0px -65% 0px" });
-    Array.prototype.forEach.call(sections.children, function (s) { io.observe(s); });
-  }
+  links.forEach(function (a) {
+    a.addEventListener("click", function (e) { e.preventDefault(); show(a.getAttribute("href").slice(1), true); });
+  });
+  window.addEventListener("hashchange", function () { show(location.hash.slice(1), false); });
+  show(location.hash.slice(1), false);
 })();

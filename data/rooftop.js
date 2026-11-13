@@ -3,15 +3,17 @@
  * To change the menu, edit this file only. Each dish is one line:
  *   { name: "Dish", desc: "What is in it", price: 1200 }
  * "desc" and "price" are optional. A dish with sizes uses "options".
+ * Each section can carry an "intro": one short line shown above it when its tab is open.
  */
 window.MENU = {
   updated: "",          // e.g. "November 2026"
   priceNote: "",        // e.g. "All prices in KES, inclusive of taxes."
-  intro: "Grab a few While You Wait bites to get started. Mains are served à la carte, so for two people we recommend picking your mains and adding two or three sides to share.",
+  intro: "",            // general tip shown with the first section; the sections below have their own
 
   sections: [
     {
       title: "While You Wait",
+      intro: "Grab a few bites to get started.",
       items: [
         { name: "The Umami Sampler", desc: "Beef, chicken & mushroom croquettes with smoked miso mayo (6 pieces)" },
         { name: "The Global Trio", desc: "Flame-kissed beef, chicken & oyster mushroom skewers (6 pieces)" },
@@ -23,6 +25,7 @@ window.MENU = {
     },
     {
       title: "Meat",
+      intro: "Mains are served à la carte. For two people we recommend picking your mains and adding two or three sides to share.",
       items: [
         { name: "Signature Sirloin Steak", desc: "Charred sirloin, savory mushroom purée, zucchini remoulade, beef jus" },
         { name: "Flame-Grilled Ribeye", desc: "Café de Paris butter, mushroom compote & bone marrow jus" },
@@ -35,6 +38,7 @@ window.MENU = {
     },
     {
       title: "Fish & Seafood",
+      intro: "Served à la carte. Add two or three sides to share.",
       items: [
         { name: "Coastal Flame Mullet", desc: "Grilled grey mullet infused with lemongrass velouté" },
         { name: "Bright & Charred Rainbow Trout", desc: "Lemon butter sauce, fresh tomato salsa & herb oil" },
@@ -44,6 +48,7 @@ window.MENU = {
     },
     {
       title: "Sides",
+      intro: "Made for sharing: two or three for the table go well with your mains.",
       items: [
         { name: "Flame-Grilled Broccolini", desc: "Rich peanut satay drizzle" },
         { name: "Crispy Pesto Baby Potatoes", desc: "Shaved parmesan & herb butter" },
@@ -54,6 +59,7 @@ window.MENU = {
     },
     {
       title: "Cocktails",
+      intro: "Enjoy a signature cocktail and take in the view.",
       groups: [
         {
           title: "270° Signature Cocktails",
@@ -84,7 +90,7 @@ window.MENU = {
     },
     {
       title: "Wines",
-      subtitle: "Our favorite wines",
+      intro: "A short list of our favorite wines.",
       groups: [
         {
           title: "Rosé & Sparkling",

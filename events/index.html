@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" href="../assets/icon.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/icon.png">
-<link rel="stylesheet" href="../assets/style.css?v=214841">
+<link rel="stylesheet" href="../assets/style.css?v=221000">
 </head>
 <body>
 
@@ -17,7 +17,7 @@
 <main>
   <section class="menu-head events-head">
     <p class="eyebrow">Events</p>
-    <h1>Host your event at <img class="inline-mark" src="../assets/logo-mark.png?v=214841" alt="270°" width="950" height="540"></h1>
+    <h1>Host your event at <img class="inline-mark" src="../assets/logo-mark.png?v=221000" alt="270°" width="950" height="540"></h1>
     <p class="events-lead">Celebrations, private dinners and company gatherings, at the rooftop or at the café.</p>
     <a class="btn solid" href="#inquire">Inquire</a>
   </section>
@@ -85,7 +85,7 @@
 
 <footer data-footer></footer>
 
-<script src="../assets/site.js?v=214841"></script>
+<script src="../assets/site.js?v=221000"></script>
 <script>
 (function () {
   var S = window.SITE, el = window.el, E = S.events;
@@ -126,11 +126,19 @@
     hint.textContent = "Your " + (E.whatsapp && E.email ? "WhatsApp or email app" : E.whatsapp ? "WhatsApp" : "email app") +
       " opens with your inquiry filled in. Nothing is stored on this website.";
   } else {
-    /* Not connected yet: add an email address or WhatsApp number under "events" in assets/site.js */
-    button("Send inquiry", true, function () {
-      error.hidden = false;
-      error.textContent = "The form is not connected yet. Add an email address or WhatsApp number in assets/site.js.";
+    /* No email address or WhatsApp number set under "events" in assets/site.js yet:
+       hide the form and offer the phone numbers instead, so nobody fills in a form that cannot send. */
+    form.hidden = true;
+    var box = el("div", { class: "inquire-call" }, [el("p", { class: "events-lead", text: "Call us and we plan your event together." })]);
+    Object.keys(S.venues).forEach(function (k) {
+      var v = S.venues[k];
+      if (!v.phone) return;
+      box.appendChild(el("p", { class: "call" }, [
+        el("span", { text: v.name + "  " }),
+        el("a", { href: window.site.tel(v.phone), text: v.phone })
+      ]));
     });
+    form.parentNode.appendChild(box);
   }
   form.addEventListener("submit", function (e) { e.preventDefault(); });
 })();
