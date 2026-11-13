@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" href="assets/icon.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/icon.png">
-<link rel="stylesheet" href="assets/style.css?v=222253">
+<link rel="stylesheet" href="assets/style.css?v=222834">
 </head>
 <body>
 
@@ -22,7 +22,7 @@
         <circle class="arc" cx="200" cy="200" r="192" pathLength="360"/>
         <g class="sun" id="sun"><circle class="aura" cx="392" cy="200" r="78"/><circle class="halo" cx="392" cy="200" r="16"/><circle cx="392" cy="200" r="4.5"/></g>
       </svg>
-      <h1 class="mark"><img src="assets/logo-mark.png?v=222253" alt="270°" width="950" height="540"></h1>
+      <h1 class="mark"><img src="assets/logo-mark.png?v=222834" alt="270°" width="950" height="540"></h1>
       <p class="rule">Rooftop · Café</p>
     </div>
     <p class="now" id="now"></p>
@@ -36,13 +36,13 @@
   <div class="places">
     <a class="place" href="rooftop/">
       <p class="eyebrow">Escada, 18th floor</p>
-      <h2 class="logo-h"><img src="assets/logo-rooftop.png?v=222253" alt="270° Rooftop" width="950" height="776"></h2>
+      <h2 class="logo-h"><img src="assets/logo-rooftop.png?v=222834" alt="270° Rooftop" width="950" height="776"></h2>
       <p>Flame-grilled mains, plates to share, signature cocktails and the view.</p>
       <span class="more">See the menu</span>
     </a>
     <a class="place" href="cafe/">
       <p class="eyebrow">Marina Bay Square</p>
-      <h2 class="logo-h"><img src="assets/logo-cafe.png?v=222253" alt="270° Café" width="766" height="815"></h2>
+      <h2 class="logo-h"><img src="assets/logo-cafe.png?v=222834" alt="270° Café" width="766" height="815"></h2>
       <p>Breakfast, smoothie bowls, sandwiches and specialty coffee.</p>
       <span class="more">See the menu</span>
     </a>
@@ -57,7 +57,7 @@
 
   <section class="block center">
     <p class="eyebrow">Events</p>
-    <h2 class="sans-h">Host your event at <img class="inline-mark" src="assets/logo-mark.png?v=222253" alt="270°" width="950" height="540"></h2>
+    <h2 class="sans-h">Host your event at <img class="inline-mark" src="assets/logo-mark.png?v=222834" alt="270°" width="950" height="540"></h2>
     <p class="events-lead">Celebrations, private dinners and company gatherings, at the rooftop or at the café, planned around you.</p>
     <div class="actions"><a class="btn" href="events/">Inquire</a></div>
   </section>
@@ -73,7 +73,7 @@
 
 <footer data-footer></footer>
 
-<script src="assets/site.js?v=222253"></script>
+<script src="assets/site.js?v=222834"></script>
 <script>
 /* The hero follows the time of day in Nairobi. The 270° arc is the day from 06:00 to 22:00:
    the dot sits where the day stands and the light changes with it. Once it has loaded you can play
@@ -114,11 +114,50 @@
     label.textContent = (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm + " in Nairobi";
   }
 
-  paint(real);
-  sun.style.transform = "rotate(135deg)";               // start at the beginning of the arc, then travel
+  /* Opening: the day runs from 06:00 up to the real time. The dot travels the arc while the light
+     and the clock change with it, so the page arrives at "now" in front of the visitor. */
+  var home = real >= START && real <= END ? real : END;     // where the dot rests
   var ready = false;
-  setTimeout(function () { hero.classList.add("lit"); paint(real); }, 80);
-  setTimeout(function () { ready = true; hero.classList.add("live"); }, 3000);   // playable once the arc has drawn itself
+  paint(START);
+  setTimeout(function () { hero.classList.add("lit"); hero.classList.add("live"); }, 80);
+
+  function arrive() { paint(real); ready = true; }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    arrive();
+  } else {
+    /* In the morning the dot would only move a few steps. So before 14:00 it first runs one whole
+       day (06:00 to 22:00), slips through the night across the open part of the circle, and stops
+       on its second round at the real time. */
+    var share = (home - START) / (END - START);
+    var legs = share < 0.5
+      ? [{ kind: "day", to: END, ms: 3000, ease: "in" }, { kind: "night", ms: 800 }, { kind: "day", to: home, ms: Math.max(1300, 3000 * share), ease: "out" }]
+      : [{ kind: "day", to: home, ms: 3000, ease: "inout" }];
+    var EASE = {
+      "in": function (k) { return k * k; },
+      "out": function (k) { return 1 - (1 - k) * (1 - k); },
+      "inout": function (k) { return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; }
+    };
+    function paintNight(k) {                                   // from 22:00 round to 06:00
+      var first = SKY[0], last = SKY[SKY.length - 1];
+      hero.style.setProperty("--glow-a", rgba(mix(last[1], first[1], k)));
+      hero.style.setProperty("--glow-b", rgba(mix(last[2], first[2], k)));
+      hero.style.setProperty("--sun", rgba(mix(last[3], first[3], k)));
+      sun.style.transform = "rotate(" + (405 + 90 * k) + "deg)";
+      var h = (END + (24 - END + START) * k) % 24, hh = Math.floor(h), mm = Math.floor((h - hh) * 60);
+      label.textContent = (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm + " in Nairobi";
+    }
+    setTimeout(function () {
+      var i = 0, began = null;
+      (function step(now) {
+        if (began === null) began = now;
+        var leg = legs[i], k = Math.min(1, (now - began) / leg.ms);
+        if (leg.kind === "night") paintNight(k);
+        else paint(START + (leg.to - START) * EASE[leg.ease](k));
+        if (k >= 1) { i++; began = null; }
+        if (i < legs.length) requestAnimationFrame(step); else arrive();
+      })(performance.now());
+    }, 500);
+  }
 
   /* Where on the arc is the pointer? 0 = start (lower left), 1 = end (lower right) */
   function along(x, y) {
@@ -129,7 +168,6 @@
   }
   /* The dot does not jump to the pointer: it eases towards it a little every frame,
      and the light and the clock move with it. */
-  var home = real >= START && real <= END ? real : END;     // where the dot rests
   var cur = home, target = home, frame = null, playing = false;
   function tick() {
     cur += (target - cur) * 0.16;
